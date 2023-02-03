@@ -5,9 +5,9 @@ import javax.swing.*;
 public class Main {
 
     public static Robot robot;
+    public static int keyCodeClick;
     public static int keyCode1;
     public static int keyCode2;
-    public static int keyCode3;
     public static int duration1;
     public static int duration2;
     private static Timer timer;
@@ -27,34 +27,34 @@ public class Main {
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
 
-        JLabel label1 = new JLabel("Key 1 Code:");
+        JLabel label1 = new JLabel("Click Code:");
+
+        JTextField keyCodeClickField = new JTextField();
+
+        JLabel label2 = new JLabel("Key 1 Code:");
 
         JTextField keyCodeField1 = new JTextField();
 
-        JLabel label2 = new JLabel("Key 2 Code:");
+        JLabel label4 = new JLabel("Key 2 Code:");
 
         JTextField keyCodeField2 = new JTextField();
 
-        JLabel label3 = new JLabel("Duration (CPS) 1 (ms):");
+        JLabel label3 = new JLabel("Duration (CPS):");
 
         JTextField durationField1 = new JTextField();
 
-        JLabel label4 = new JLabel("Key 2 Code:");
-
-        JTextField keyCodeField3 = new JTextField();
-
-        JLabel label5 = new JLabel("Duration 2 (ms):");
+        JLabel label5 = new JLabel("Change Keys Duration (ms):");
 
         JTextField durationField2 = new JTextField();
 
         panel.add(label1);
-        panel.add(keyCodeField1);
+        panel.add(keyCodeClickField);
         panel.add(label2);
-        panel.add(keyCodeField2);
+        panel.add(keyCodeField1);
         panel.add(label3);
         panel.add(durationField1);
         panel.add(label4);
-        panel.add(keyCodeField3);
+        panel.add(keyCodeField2);
         panel.add(label5);
         panel.add(durationField2);
 
@@ -63,23 +63,20 @@ public class Main {
         //68
         //65
 
-        startButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
+        startButton.addActionListener(e -> {
 
-                keyCode1 = Integer.parseInt(keyCodeField1.getText());
-                keyCode2 = Integer.parseInt(keyCodeField2.getText());
-                keyCode3 = Integer.parseInt(keyCodeField3.getText());
-                duration1 = Integer.parseInt(durationField1.getText());
-                duration2 = Integer.parseInt(durationField2.getText());
-                try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException ex) {
-                    ex.printStackTrace();
-                }
-                timer = new Timer(duration1 + duration2, new TimerListener());
-                timer.start();
+            keyCodeClick = Integer.parseInt(keyCodeClickField.getText());
+            keyCode1 = Integer.parseInt(keyCodeField1.getText());
+            keyCode2 = Integer.parseInt(keyCodeField2.getText());
+            duration1 = Integer.parseInt(durationField1.getText());
+            duration2 = Integer.parseInt(durationField2.getText());
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException ex) {
+                ex.printStackTrace();
             }
+            timer = new Timer(duration1 + duration2, new TimerListener());
+            timer.start();
         });
         panel.add(startButton);
 
@@ -89,8 +86,8 @@ public class Main {
 
 class TimerListener implements ActionListener {
 
-    int durchgang = 1;
-    long startTime = System.currentTimeMillis();
+    int round = 1;
+    long roundStartTime = System.currentTimeMillis();
     @Override
     public void actionPerformed(ActionEvent e) {
          //fetch starting time
@@ -104,30 +101,30 @@ class TimerListener implements ActionListener {
 //        Main.robot.keyRelease(Main.keyCode1);
 
 
-        if(startTime == 0 && durchgang == 1){
-            while((System.currentTimeMillis() - startTime) < Main.duration1)
-            {
-                Main.robot.keyPress(Main.keyCode2);
+        switch (round) {
+            case 1: {
+                while((System.currentTimeMillis() - roundStartTime) > Main.duration1)
+                {
+                    Main.robot.keyPress(Main.keyCode1);
+                    Main.robot.keyRelease(Main.keyCode1);
+
+                }
+                Main.robot.keyRelease(Main.keyCode1);
+
+                round = 2;
+            }
+            case 2: {
+                while((System.currentTimeMillis() - roundStartTime) > Main.duration1)
+                {
+                    Main.robot.keyPress(Main.keyCode2);
+                    Main.robot.keyRelease(Main.keyCode2);
+
+                }
                 Main.robot.keyRelease(Main.keyCode2);
-
+                round = 1;
             }
-            Main.robot.keyRelease(Main.keyCode2);
-
-            durchgang = 2;
         }
-        if (startTime == 0 && durchgang == 2){
-            while((System.currentTimeMillis() - startTime) < Main.duration1)
-            {
-                Main.robot.keyPress(Main.keyCode3);
-                Main.robot.keyRelease(Main.keyCode3);
 
-            }
-            Main.robot.keyRelease(Main.keyCode3);
-            durchgang = 1;
-        }
-        startTime = 0;
-
-
-
+        roundStartTime = System.currentTimeMillis();
     }
 }
